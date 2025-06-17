@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 import logging
 import uvicorn
 
@@ -25,7 +26,11 @@ logging.info("Tool registration complete.")
 
 # --- Main Execution Logic --- #
 def main():
-    mcp.run(transport="stdio")
+    sse_port = os.getenv("TICKTICK_MCP_SSE_PORT", 0)
+    if sse_port:
+        mcp.run(transport="sse", port=sse_port)
+    else:
+        mcp.run(transport="stdio")
 
 # --- Script Entry Point --- #
 if __name__ == "__main__":
