@@ -550,6 +550,55 @@ async def ticktick_get_tasks_from_project(project_id: str) -> str:
 
 @mcp.tool()
 @require_ticktick_client
+async def ticktick_get_task_count_in_project(project_id: str) -> str:
+    """
+    Retrieves the number of *uncompleted* tasks belonging to a specific project ID.
+
+    Args:
+        project_id (str): The ID string of the project. Required.
+                         Must be a valid TickTick project ID.
+
+    Returns:
+        A JSON string with one of the following structures:
+        - Success: An integer value which is the number of task objects (can be 0 if project has no tasks)
+        - Error: {"error": "Error message describing what went wrong"}
+
+    Limitations:
+        - Only returns the count of uncompleted tasks (completed tasks are not included)
+        - The project must exist and be accessible to the user
+        - Does not return tasks in nested projects (if the project has sub-projects)
+
+    Examples:
+        Get number of tasks from a work project:
+        {
+            "project_id": "project_work_456"
+        }
+
+    Agent Usage Guide:
+        - Use this tool when users ask to "count number of tasks in [project]" or "how many tasks are in present in [project]"
+        - First find the project ID using ticktick_get_all("projects") if needed
+        - Always specify that only uncompleted tasks are returned
+        - Example mapping:
+          "Tell me the number of my work tasks" →
+          First determine work project ID from ticktick_get_all("projects")
+          Then: {"project_id": "[found project ID]"}
+    """
+
+    try:
+        client = TickTickClientSingleton.get_client()
+        tasks = client.task.get_from_project(project_id)
+        # Ensure result is a list even if API returns None or single dict
+        if tasks is None:
+             tasks = []
+        elif isinstance(tasks, dict):
+             tasks = [tasks]
+        return str(len(tasks))
+    except Exception as e:
+        logging.error(f"Failed to get tasks from project {project_id}: {e}", exc_info=True)
+        return format_response({"error": f"Failed to get tasks from project {project_id}: {e}"})
+
+@mcp.tool()
+@require_ticktick_client
 async def ticktick_complete_task(task_id: str) -> str:
     """
     Marks a specific task as complete using its ID.

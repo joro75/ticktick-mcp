@@ -161,7 +161,12 @@ This server provides the following tools for interacting with the TickTick task 
    * Inputs:
      * `project_id` (string): The ID of the project.
 
-10. `ticktick_filter_tasks`
+10. `ticktick_get_task_count_in_project`
+   * Retrieves the number of uncompleted tasks present in a specific project
+   * Inputs:
+     * `project_id` (string): The ID of the project.
+
+11. `ticktick_filter_tasks`
     * Filters tasks based on various criteria
     * Inputs:
       * `filter_criteria` (object): Dictionary with filtering parameters such as:
@@ -178,7 +183,7 @@ This server provides the following tools for interacting with the TickTick task 
 
 ### Helper Tools
 
-11. `ticktick_convert_datetime_to_ticktick_format`
+12. `ticktick_convert_datetime_to_ticktick_format`
     * Converts ISO 8601 date/time string to TickTick API format
     * Inputs:
       * `datetime_iso_string` (string): The date/time string in ISO 8601 format.
