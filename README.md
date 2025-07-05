@@ -180,6 +180,8 @@ This server provides the following tools for interacting with the TickTick task 
         * `completion_end_date` (string, optional): End date for completion date filter.
         * `sort_by_priority` (boolean, optional): Sort results by priority.
         * `tz` (string, optional): Timezone for date interpretation.
+        * `title` (string, optional): Regular expression to (case insensitive) match the title to filter tasks by.
+        * `content` (string, optional): Regular expression to (case insensitive) match the content to filter tasks by.
 
 ### Helper Tools
 

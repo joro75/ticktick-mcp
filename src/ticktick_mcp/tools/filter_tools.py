@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import re
 from typing import Optional, List, Dict, Any, Union, Literal, Tuple
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import BaseModel, Field, validator
@@ -122,6 +123,8 @@ class PropertyFilter(BaseModel):
         tag_label: Optional tag string.
         due_date_filter: Optional PeriodFilter object for uncompleted tasks.
         completion_date_filter: Optional PeriodFilter object for completed tasks.
+        title: Optional string as a regular expression for the title.
+        content: Optional string as a regular expression for the content.
     """
     tag_label: Optional[TagLabel] = Field(None, description="Filter tasks by specific tag")
     project_id: Optional[str] = Field(None, description="Filter tasks by project ID")
@@ -129,7 +132,8 @@ class PropertyFilter(BaseModel):
     due_date_filter: Optional[PeriodFilter] = Field(None, description="Filter for task due dates")
     completion_date_filter: Optional[PeriodFilter] = Field(None, description="Filter for task completion dates")
     status: TaskStatus = Field("uncompleted", description="Task status to filter by (uncompleted or completed)")
-
+    title: Optional[str] = Field(None, description="Filter tasks by a (case insensitive) regular expression for the title")
+    content: Optional[str] = Field(None, description="Filter tasks by a (case insensitive) regular expression for the content")
 
     def matches(self, task: TaskDict) -> bool:
         task_tags = task.get('tags', [])
@@ -157,6 +161,34 @@ class PropertyFilter(BaseModel):
         elif task_is_completed and self.completion_date_filter: # Completed task, check completion date
             if not self.completion_date_filter.contains(task.get("completedTime")):
                 return False
+
+        if self.title:
+            title = task.get('title', '')
+            try:
+                # Search using a regular expression also allowing spanning multiple lines.
+                pattern = re.compile(self.title, re.IGNORECASE | re.DOTALL)
+                if not pattern.search(title):
+                    # If regex does not match, check for plain (case-insensitive) substring presence
+                    if not self.title.lower() in title.lower():
+                        return False
+            except re.error:
+                # Invalid regex pattern, check for plain (case-insensitive) substring presence
+                if not self.title.lower() in title.lower():
+                    return False
+
+        if self.content:
+            content = task.get('content', '')
+            try:
+                # Search using a regular expression also allowing spanning multiple lines.
+                pattern = re.compile(self.content, re.IGNORECASE | re.DOTALL)
+                if not pattern.search(content):
+                    # If regex does not match, check for plain (case-insensitive) substring presence
+                    if not self.content.lower() in content.lower():
+                        return False
+            except re.error:
+                # Invalid regex pattern, check for plain (case-insensitive) substring presence
+                if not self.content.lower() in content.lower():
+                    return False
 
         # All relevant checks passed
         return True
@@ -299,6 +331,8 @@ def _build_property_filter(
     due_end_date = criteria.get("due_end_date")
     completion_start_date = criteria.get("completion_start_date")
     completion_end_date = criteria.get("completion_end_date")
+    title = criteria.get("title")
+    content = criteria.get("content")
     sort_by_priority = criteria.get("sort_by_priority", False)
     tz = criteria.get("tz")
 
@@ -353,6 +387,8 @@ def _build_property_filter(
         priority=priority,
         due_date_filter=due_filter,
         completion_date_filter=completion_filter,
+        title=title,
+        content=content
     )
 
     return property_filter, tz_info, sort_by_priority
@@ -383,6 +419,8 @@ async def ticktick_filter_tasks(
             - completion_end_date (str, optional): ISO format end date/time for completion date filter (requires status='completed').
             - sort_by_priority (bool, optional): Sort results by priority (descending). Defaults to False.
             - tz (str, optional): Timezone name (e.g., 'America/New_York') for date interpretation.
+            - title (str, optional): A regular expression to (case insensitive) match the title to filter tasks by.
+            - content (str, optional): A regular expression to (case insensitive) match the content to filter tasks by.
 
     Returns:
         A JSON string with one of the following structures:
@@ -436,6 +474,14 @@ async def ticktick_filter_tasks(
             }
         }
 
+        Get tasks with a specific text in the title:
+        {
+            "filter_criteria": {
+                "status": "uncompleted",
+                "title": "Dentist"
+            }
+        }
+
     Agent Usage Guide:
         - This is the most versatile tool for finding tasks based on specific criteria
         - Always specify a timezone (tz) when using date filters to ensure correct interpretation
@@ -467,6 +513,12 @@ async def ticktick_filter_tasks(
                   "completion_start_date": "[last week's start date]",
                   "completion_end_date": "[last week's end date]",
                   "tz": "[user's timezone]"
+              }
+          }
+          "Show me tasks that contain the word kitchen" → {
+              "filter_criteria": {
+                  "status": "uncompleted",
+                  "content": "kitchen"
               }
           }
     """
