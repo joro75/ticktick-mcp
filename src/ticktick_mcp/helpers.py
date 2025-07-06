@@ -226,7 +226,7 @@ def _filter_unneeded_properties_projects(projects: List[Dict]) -> List[Dict]:
 
         # Remove some properties when they are empty
         remove_empty_props = [
-            "groupId", "notificationOptions", "teamId"
+            "color", "groupId", "notificationOptions", "teamId"
         ]
         for prop in remove_empty_props:
             if prop in prj and not prj[prop]:
