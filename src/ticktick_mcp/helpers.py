@@ -52,6 +52,7 @@ def _get_all_tasks_from_ticktick() -> List[TaskObject]:
         logging.error("_get_all_tasks_from_ticktick called when client is not initialized.")
         raise ConnectionError("TickTick client not initialized.")
 
+    TickTickClientSingleton.get_client().sync()
     all_tasks = []
     try:
         projects_state = TickTickClientSingleton.get_client().state.get('projects', [])
