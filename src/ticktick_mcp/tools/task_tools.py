@@ -443,6 +443,7 @@ def _filter_unneeded_properties(tasks: List[Dict]) -> List[Dict]:
     - Removes the 'kind' property if its value is the default "TEXT".
     - Removes the 'isAllDay' property if it is False.
     - Removes 'repeatTaskId' if it is equal to the task's own 'id'.
+    - Removes 'timeZone' if not date or time related property is present anymore
 
     Args:
         tasks (List[Dict]): A list of task dictionaries to be filtered.
@@ -493,6 +494,17 @@ def _filter_unneeded_properties(tasks: List[Dict]) -> List[Dict]:
         # Remove 'repeatTaskId' if it equals the task's own 'id'
         if "repeatTaskId" in task and task.get("id") == task.get("repeatTaskId"):
             del task["repeatTaskId"]
+
+        # Remove 'timeZone' if no date related properties are present anymore
+        if "timeZone" in task:
+            remove_timeZone = True
+            date_props = [ "startDate", "dueDate", "repeatFirstDate" ]
+            for prop in date_props:
+                if prop in task:
+                    remove_timeZone = False
+                    break
+            if remove_timeZone:
+                del task["timeZone"]
 
         filtered.append(task)
 
