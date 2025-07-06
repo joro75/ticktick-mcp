@@ -13,7 +13,8 @@ from ..client import TickTickClientSingleton
 # Import helpers
 from ..helpers import (
     format_response, require_ticktick_client,
-    _get_all_tasks_from_ticktick
+    _get_all_tasks_from_ticktick,
+    _filter_unneeded_properties_tasks
 )
 
 # Type Hints (can be shared or moved)
@@ -535,6 +536,8 @@ async def ticktick_filter_tasks(
             tz_info=tz_info
         )
 
+        # Remove unneeded information
+        result = _filter_unneeded_properties_tasks(result)
         # Format success response
         return format_response(result)
 
