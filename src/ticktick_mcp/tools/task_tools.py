@@ -535,6 +535,7 @@ async def ticktick_get_tasks_from_project(project_id: str) -> str:
 
     try:
         client = TickTickClientSingleton.get_client()
+        client.sync()
         tasks = client.task.get_from_project(project_id)
         # Ensure result is a list even if API returns None or single dict
         if tasks is None:
@@ -918,9 +919,10 @@ async def ticktick_get_all(search: str) -> str:
         if not client:
             raise ToolLogicError("TickTick client is not available.")
         
+        client.sync()
+
         # Get all tasks initially treats search as case-sensitive
         search_lower = search.lower()
-        client.sync()
         if search_lower == "tasks":
             all_items = _get_all_tasks_from_ticktick()
             # Remove unneeded information
