@@ -12,6 +12,9 @@ from ..client import TickTickClientSingleton
 # Import helpers
 from ..helpers import format_response, require_ticktick_client, _get_all_tasks_from_ticktick, ToolLogicError
 
+# If more than a specific number of tasks are going to be returned, it will raise an error
+MAXIMUM_NUMBER_OF_TASKS_FROM_GET_ALL = 500
+
 # Type Hints (can be shared or moved)
 TaskId = str
 ProjectId = str
@@ -927,7 +930,12 @@ async def ticktick_get_all(search: str) -> str:
             all_items = _get_all_tasks_from_ticktick()
             # Remove unneeded information
             all_items = _filter_unneeded_properties(all_items)
-            return format_response(all_items)
+            if len(all_items) > MAXIMUM_NUMBER_OF_TASKS_FROM_GET_ALL:
+                return format_response({"error":
+                    f"""In total {len(all_items)} tasks are available which is more than the allowed maximum of {MAXIMUM_NUMBER_OF_TASKS_FROM_GET_ALL} tasks.
+                        It is better to use `ticktick_get_tasks_from_project` or `ticktick_filter_tasks` to only get a specific subset of the available tasks."""})
+            else:
+                return format_response(all_items)
         elif search_lower == "projects":
             projects = [ { "id": client.inbox_id, "name": "Inbox" } ] + client.state['projects']
             return format_response(projects)
