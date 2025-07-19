@@ -26,7 +26,7 @@ logging.info("Tool registration complete.")
 
 # --- Main Execution Logic --- #
 def main():
-    sse_port = os.getenv("TICKTICK_MCP_SSE_PORT", 0)
+    sse_port = int(os.getenv("TICKTICK_MCP_SSE_PORT", 0))
     if sse_port:
         mcp.run(transport="sse", port=sse_port)
     else:
