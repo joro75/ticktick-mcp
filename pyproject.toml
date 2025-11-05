@@ -12,9 +12,9 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "anyio>=4.9.0",
-    "fastmcp>=2.8.1",
-    "python-dotenv>=1.1.0",
+    "anyio>=4.11.0",
+    "fastmcp>=2.10.6",
+    "python-dotenv>=1.2.1",
     "ticktick-py",
     "tzlocal>=5.3.1",
 ]
@@ -30,5 +30,5 @@ ticktick-py = { git = "https://github.com/jen6/ticktick-py.git", rev = "main" }
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.5",
+    "pytest>=8.4.2",
 ]
