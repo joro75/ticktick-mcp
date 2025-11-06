@@ -25,10 +25,10 @@ ticktick-mcp = "main:main"
 [project.urls]
 "Homepage" = "https://github.com/jen6/ticktick-mcp"
 
-[tool.uv.sources]
-ticktick-py = { git = "https://github.com/jen6/ticktick-py.git", rev = "main" }
-
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
 ]
+
+[tool.uv.sources]
+ticktick-py = { git = "https://github.com/joro75/ticktick-py.git" }
