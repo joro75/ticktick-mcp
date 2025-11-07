@@ -28,7 +28,7 @@ logging.info("Tool registration complete.")
 def main():
     sse_port = int(os.getenv("TICKTICK_MCP_SSE_PORT", 0))
     if sse_port:
-        mcp.run(transport="sse", port=sse_port)
+        mcp.run(transport="sse", port=sse_port, host="0.0.0.0")
     else:
         mcp.run(transport="stdio")
 
