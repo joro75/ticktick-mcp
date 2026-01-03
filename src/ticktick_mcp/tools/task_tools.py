@@ -307,13 +307,18 @@ async def update_task(
           Then: {
               "task_object": {
                   "id": "[found task ID]",
-                  "projectId": "[projectId in which task is present",]
+                  "projectId": "[projectId in which task is present]",
                   "startDate": "2024-07-27T09:00:00+09:00",
                   "dueDate": "2024-07-27T10:30:00+09:00"
               }
           }
         - For updating subtasks, you must include the entire items array with all subtasks
     """
+    if not task_object.id:
+        return format_response({"error": f"Task doesn't have a required id.", "status": "no_id"})
+    if not task_object.projectId:
+        return format_response({"error": f"Task doesn't have a required projectId.", "status": "no_projectId"})
+
     task_id = task_object.id
     logging.info(f"Attempting to update task ID: {task_id}")
 
